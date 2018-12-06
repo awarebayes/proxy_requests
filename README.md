@@ -38,19 +38,28 @@ because you just work with the api you already know.
 
 <code>
   r = ProxyRequestsFactory()
-  
+</code>
+<br>
+<code>
   data = {"key1": "value1", "key2": "value2"}
-  
+</code>
+<br>
+<code>
   headers = {"name": "rootVIII", "secret_message": "7Yufs9KIfj33d"}
-  
+</code>
+<br>
+<code>
   response = r.perform(lambda prox: requests.post("https://postman-echo.com/post", proxies=prox, data=data, headers=headers))
-  
+</code>
+<br>
+<code>
   print(response.json())
 </code>
+<br>
 
 <b>example ProxyRequests:</b><br>
 
-<b>example GET:</b><br>
+<b>example GET:</b>
 <code>
   r = ProxyRequests("https://api.ipify.org")
 </code>
