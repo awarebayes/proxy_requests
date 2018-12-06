@@ -219,13 +219,79 @@ class ProxyRequestsBasicAuth(ProxyRequests):
         return str(self.request)
 
 
+class ProxyRequestsFactory:
+    def __init__(self):
+        self.sockets = []
+        self.__acquire_sockets()
+
+    # get a list of sockets from sslproxies.org
+    def __acquire_sockets(self):
+        r = requests.get("https://www.sslproxies.org/")
+        matches = re.findall(r"<td>\d+.\d+.\d+.\d+</td><td>\d+</td>", r.text)
+        revised_list = [m1.replace("<td>", "") for m1 in matches]
+        for socket_str in revised_list:
+            self.sockets.append(socket_str[:-5].replace("</td>", ":"))
+
+    # recursively try proxy sockets until successful GET
+    def perform(self, f):
+        # What is there are no sockets awailable? Just infinite loop of nothingness...
+        if not self.sockets:
+            self.__acquire_sockets()
+
+        current_socket = self.sockets[0]
+        proxies = {"http": "http://" + current_socket, "https": "https://" + current_socket}
+        try:
+            request = f(proxies)
+            request.proxy_used = current_socket
+            return request
+        except requests.exceptions.BaseHTTPError:
+            # Proxy doesnt seem to be working. We can safely delete it
+            self.sockets.pop(0)
+            print('working...')
+            return self.perform(f)
+
+
+class ProxyRequestsAuthFactoryFactory:
+    def __init__(self, username, password):
+        self.sockets = []
+        self.__acquire_sockets()
+        self.username = username
+        self.password = password
+
+    # get a list of sockets from sslproxies.org
+    def __acquire_sockets(self):
+        r = requests.get("https://www.sslproxies.org/")
+        matches = re.findall(r"<td>\d+.\d+.\d+.\d+</td><td>\d+</td>", r.text)
+        revised_list = [m1.replace("<td>", "") for m1 in matches]
+        for socket_str in revised_list:
+            self.sockets.append(socket_str[:-5].replace("</td>", ":"))
+
+    # recursively try proxy sockets until successful GET
+    def perform(self, f):
+        # What is there are no sockets awailable? Just infinite loop of nothingness...
+        if not self.sockets:
+            self.__acquire_sockets()
+
+        current_socket = self.sockets[0]
+        proxies = {"http": "http://" + current_socket, "https": "https://" + current_socket}
+        try:
+            request = f(proxies, (self.username, self.password))
+            request.proxy_used = current_socket
+            return request
+        except requests.exceptions.BaseHTTPError:
+            # Proxy doesnt seem to be working. We can safely delete it
+            self.sockets.pop(0)
+            print('working...')
+            return self.perform(f)
+
+def main():
+    pass
+
+
 if __name__ == "__main__":
     # example post with headers
-    r = ProxyRequests("https://postman-echo.com/post")
-    r.set_headers({"name": "rootVIII", "secret_message": "7Yufs9KIfj33d"})
-    r.post_with_headers({"key1": "value1", "key2": "value2"})
-    print(r)
-    print(r.get_headers())
-    print(r.get_status_code())
-    # print(r.to_json())
-    print(r.get_proxy_used())
+    r = ProxyRequestsFactory()
+    data = {"key1": "value1", "key2": "value2"}
+    headers = {"name": "rootVIII", "secret_message": "7Yufs9KIfj33d"}
+    response = r.perform(lambda prox: requests.post("https://postman-echo.com/post", proxies=prox, data=data, headers=headers))
+    print(response.json())
