@@ -34,7 +34,7 @@ It takes a function and supplies it with proxy (and auth credentials as an optio
 It is just a wrapper for requests, so it is preferable to use this over ProxyRequests
 because you just work with the api you already know.
 
-<b>example ProxyRequestsFactory:</b><br>
+<H3><b>Examples ProxyRequestsFactory:</b><br></H3>
 
 <code>
   r = ProxyRequestsFactory()
@@ -57,7 +57,7 @@ because you just work with the api you already know.
 </code>
 <br>
 
-<b>example ProxyRequests:</b><br>
+<H3><b>Examples ProxyRequests:</b><br></H3>
 
 <b>example GET:</b>
 <code>
