@@ -27,6 +27,29 @@ If the above import statement is used, method calls will be identical to the one
 The ProxyRequestBasicAuth subclass has get, post, post_with_headers, and post_file methods that will override the Parent methods.
 <br><br>
 
+<b>Factories:</b><br>
+ProxyFactory is a simple object for performing proxy requests.
+
+It takes a function and supplies it with proxy (and auth credentials as an option).
+It is just a wrapper for requests, so it is preferable to use this over ProxyRequests
+because you just work with the api you already know.
+
+<b>example ProxyRequestsFactory:</b><br>
+
+<code>
+  r = ProxyRequestsFactory()
+  
+  data = {"key1": "value1", "key2": "value2"}
+  
+  headers = {"name": "rootVIII", "secret_message": "7Yufs9KIfj33d"}
+  
+  response = r.perform(lambda prox: requests.post("https://postman-echo.com/post", proxies=prox, data=data, headers=headers))
+  
+  print(response.json())
+</code>
+
+<b>example ProxyRequests:</b><br>
+
 <b>example GET:</b><br>
 <code>
   r = ProxyRequests("https://api.ipify.org")
